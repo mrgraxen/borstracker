@@ -1,0 +1,36 @@
+{
+  "appTitle": "Börstracker",
+  "language": "Language",
+  "sound": "Alert sound",
+  "soundOn": "Sounds on",
+  "soundOff": "Sounds off",
+  "gdpr": "We use a session cookie to save your watchlist and alert settings. No tracking or third-party cookies.",
+  "gdprDismiss": "Got it",
+  "addSymbol": "Add symbol",
+  "symbolPlaceholder": "e.g. AAPL or VOLV-B.ST",
+  "add": "Add",
+  "remove": "Remove",
+  "stale": "Stale",
+  "alerts": "Alerts",
+  "alertType": "Type",
+  "threshold": "Threshold",
+  "cooldown": "Cooldown (sec)",
+  "enabled": "Enabled",
+  "createAlert": "Create alert",
+  "history": "Alert history",
+  "noAlerts": "No alerts yet",
+  "noWatchlist": "Add stocks to your watchlist",
+  "types": {
+    "absolute_below": "Price below",
+    "absolute_above": "Price above",
+    "pct_below_open": "% below open",
+    "pct_above_open": "% above open"
+  },
+  "ranges": {
+    "1d": "1D",
+    "1w": "1W",
+    "1m": "1M",
+    "3m": "3M",
+    "1y": "1Y"
+  }
+}

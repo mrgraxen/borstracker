@@ -1,0 +1,36 @@
+{
+  "appTitle": "Börstracker",
+  "language": "Språk",
+  "sound": "Ljud för larm",
+  "soundOn": "Ljud på",
+  "soundOff": "Ljud av",
+  "gdpr": "Vi använder en sessionscookie för att spara din bevakningslista och larminställningar. Ingen spårning eller tredjepartscookies.",
+  "gdprDismiss": "Jag förstår",
+  "addSymbol": "Lägg till symbol",
+  "symbolPlaceholder": "t.ex. AAPL eller VOLV-B.ST",
+  "add": "Lägg till",
+  "remove": "Ta bort",
+  "stale": "Inaktuell",
+  "alerts": "Larm",
+  "alertType": "Typ",
+  "threshold": "Tröskel",
+  "cooldown": "Cooldown (sek)",
+  "enabled": "Aktiv",
+  "createAlert": "Skapa larm",
+  "history": "Larmhistorik",
+  "noAlerts": "Inga larm ännu",
+  "noWatchlist": "Lägg till aktier i din bevakningslista",
+  "types": {
+    "absolute_below": "Pris under",
+    "absolute_above": "Pris över",
+    "pct_below_open": "% under öppning",
+    "pct_above_open": "% över öppning"
+  },
+  "ranges": {
+    "1d": "1D",
+    "1w": "1V",
+    "1m": "1M",
+    "3m": "3M",
+    "1y": "1Å"
+  }
+}
