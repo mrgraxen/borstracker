@@ -39,10 +39,8 @@ export default function App() {
     setWatchlist(w.items);
     setAlerts(a.alerts);
     setHistory(h.events);
-    if (!selected && w.items.length > 0) {
-      setSelected(w.items[0].symbol);
-    }
-  }, [i18n, selected]);
+    setSelected((prev) => prev ?? w.items[0]?.symbol ?? null);
+  }, [i18n]);
 
   useEffect(() => {
     void refresh();

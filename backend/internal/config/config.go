@@ -17,7 +17,9 @@ type Config struct {
 	SessionCookieName  string
 	APIAddr            string
 	PriceFetcherAddr   string
-	RateLimitPerMin    int
+	RateLimitReadPerMin   int
+	RateLimitWritePerMin  int
+	RateLimitSearchPerMin int
 	PollInterval       time.Duration
 	YahooMaxConcurrent int
 	PriceCacheTTL      time.Duration
@@ -35,7 +37,9 @@ func Load() Config {
 		SessionCookieName:  getEnv("SESSION_COOKIE_NAME", "session_id"),
 		APIAddr:            getEnv("API_ADDR", ":8080"),
 		PriceFetcherAddr:   getEnv("PRICE_FETCHER_ADDR", ":8081"),
-		RateLimitPerMin:    getEnvInt("API_RATE_LIMIT_PER_MIN", 60),
+		RateLimitReadPerMin:   getEnvInt("API_RATE_LIMIT_READ_PER_MIN", 300),
+		RateLimitWritePerMin:  rateLimitWritePerMin(),
+		RateLimitSearchPerMin: getEnvInt("API_RATE_LIMIT_SEARCH_PER_MIN", 120),
 		PollInterval:       time.Duration(getEnvInt("POLL_INTERVAL_SEC", 5)) * time.Second,
 		YahooMaxConcurrent: getEnvInt("YAHOO_MAX_CONCURRENCY", 10),
 		PriceCacheTTL:      time.Duration(getEnvInt("PRICE_CACHE_TTL_SEC", 5)) * time.Second,
@@ -56,6 +60,15 @@ func getEnvInt(key string, fallback int) int {
 		}
 	}
 	return fallback
+}
+
+func rateLimitWritePerMin() int {
+	if v := os.Getenv("API_RATE_LIMIT_WRITE_PER_MIN"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			return n
+		}
+	}
+	return getEnvInt("API_RATE_LIMIT_PER_MIN", 60)
 }
 
 func getEnvBool(key string, fallback bool) bool {

@@ -44,7 +44,7 @@ export function SymbolSearch({ onAdded }: Props) {
 
   useEffect(() => {
     const q = query.trim();
-    if (q.length < 1) {
+    if (q.length < 2) {
       setResults([]);
       setOpen(false);
       setLoading(false);

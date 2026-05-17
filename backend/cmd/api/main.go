@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -74,7 +75,7 @@ func main() {
 	}
 
 	sessMW := session.NewMiddleware(cfg, sessions)
-	limiter := ratelimit.New(redisClient, cfg.RateLimitPerMin)
+	limiter := ratelimit.New(redisClient)
 
 	go startRedisSubscriber(ctx, redisClient, hub, logger)
 
@@ -103,7 +104,7 @@ func main() {
 
 	v1 := r.Group("/api/v1")
 	v1.Use(sessMW.Handle())
-	v1.Use(rateLimitMiddleware(limiter))
+	v1.Use(rateLimitMiddleware(limiter, cfg))
 	{
 		v1.GET("/settings", srv.GetSettings)
 		v1.PATCH("/settings", srv.PatchSettings)
@@ -186,7 +187,7 @@ func startRedisSubscriber(ctx context.Context, client *redis.Client, hub *ws.Hub
 	}
 }
 
-func rateLimitMiddleware(l *ratelimit.Limiter) gin.HandlerFunc {
+func rateLimitMiddleware(l *ratelimit.Limiter, cfg config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.Request.URL.Path == "/api/v1/ws" {
 			c.Next()
@@ -197,11 +198,28 @@ func rateLimitMiddleware(l *ratelimit.Limiter) gin.HandlerFunc {
 			c.Next()
 			return
 		}
-		ok, err := l.Allow(c.Request.Context(), sid)
+
+		path := c.Request.URL.Path
+		var bucket string
+		var limit int
+		switch {
+		case strings.HasPrefix(path, "/api/v1/symbols/search"):
+			bucket = "search"
+			limit = cfg.RateLimitSearchPerMin
+		case c.Request.Method == http.MethodGet || c.Request.Method == http.MethodHead:
+			bucket = "read"
+			limit = cfg.RateLimitReadPerMin
+		default:
+			bucket = "write"
+			limit = cfg.RateLimitWritePerMin
+		}
+
+		ok, err := l.Allow(c.Request.Context(), ratelimit.Key(sid, bucket), limit)
 		if err != nil || ok {
 			c.Next()
 			return
 		}
+		c.Header("Retry-After", "60")
 		c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "rate limit exceeded"})
 	}
 }

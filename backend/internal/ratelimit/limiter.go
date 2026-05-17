@@ -10,23 +10,21 @@ import (
 
 type Limiter struct {
 	client *redis.Client
-	limit  int
 	window time.Duration
 }
 
-func New(client *redis.Client, perMin int) *Limiter {
+func New(client *redis.Client) *Limiter {
 	return &Limiter{
 		client: client,
-		limit:  perMin,
 		window: time.Minute,
 	}
 }
 
-func (l *Limiter) Allow(ctx context.Context, sessionID string) (bool, error) {
-	if l.client == nil {
+// Allow checks a per-key counter against limit within a rolling minute window.
+func (l *Limiter) Allow(ctx context.Context, key string, limit int) (bool, error) {
+	if l.client == nil || limit <= 0 {
 		return true, nil
 	}
-	key := fmt.Sprintf("ratelimit:%s", sessionID)
 	pipe := l.client.Pipeline()
 	incr := pipe.Incr(ctx, key)
 	pipe.Expire(ctx, key, l.window)
@@ -37,5 +35,9 @@ func (l *Limiter) Allow(ctx context.Context, sessionID string) (bool, error) {
 	if err != nil {
 		return true, err
 	}
-	return count <= int64(l.limit), nil
+	return count <= int64(limit), nil
+}
+
+func Key(sessionID, bucket string) string {
+	return fmt.Sprintf("ratelimit:%s:%s", sessionID, bucket)
 }
