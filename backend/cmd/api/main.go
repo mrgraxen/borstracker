@@ -107,6 +107,7 @@ func main() {
 	{
 		v1.GET("/settings", srv.GetSettings)
 		v1.PATCH("/settings", srv.PatchSettings)
+		v1.GET("/symbols/search", srv.SearchSymbols)
 		v1.GET("/watchlist", srv.GetWatchlist)
 		v1.POST("/watchlist", srv.AddWatchlist)
 		v1.DELETE("/watchlist/:symbol", srv.RemoveWatchlist)

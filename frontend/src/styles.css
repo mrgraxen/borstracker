@@ -96,11 +96,116 @@ button:hover {
 .add-form {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.25rem;
 }
 
 .add-form input {
   flex: 1;
+}
+
+.symbol-search {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.symbol-search-input-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.symbol-search-input-wrap input {
+  width: 100%;
+}
+
+.symbol-search-spinner {
+  position: absolute;
+  right: 0.5rem;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #3b82f6;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.symbol-search-results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 2px);
+  z-index: 50;
+  max-height: 280px;
+  overflow-y: auto;
+  background: #151d27;
+  border: 1px solid #2a4058;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.symbol-search-results li {
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+  border-bottom: 1px solid #1e2833;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.symbol-search-results li:last-child {
+  border-bottom: none;
+}
+
+.symbol-search-results li:hover,
+.symbol-search-results li.active {
+  background: #1e2d42;
+}
+
+.symbol-search-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.symbol-search-symbol {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #93c5fd;
+}
+
+.symbol-search-name {
+  font-size: 0.85rem;
+  color: #c8d1dc;
+}
+
+.symbol-search-venue {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #fbbf24;
+  background: #3d3018;
+  border: 1px solid #92670a;
+  border-radius: 4px;
+  padding: 0.15rem 0.45rem;
+}
+
+.symbol-search-error {
+  color: #f87171;
+  font-size: 0.8rem;
+  margin: 0.35rem 0 0;
 }
 
 .watchlist {

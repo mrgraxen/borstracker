@@ -37,7 +37,7 @@ func TestFetchQuote_RetrySuccess(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	client := NewClientWithHTTP(srv.Client(), srv.URL+"/")
+	client := NewClientWithHTTP(srv.Client(), srv.URL+"/", "")
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 

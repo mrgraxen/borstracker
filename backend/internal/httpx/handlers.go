@@ -3,6 +3,7 @@ package httpx
 import (
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -48,6 +49,25 @@ type patchSettingsReq struct {
 	Language     *string `json:"language"`
 	SoundID      *int16  `json:"soundId"`
 	SoundEnabled *bool   `json:"soundEnabled"`
+}
+
+func (s *Server) SearchSymbols(c *gin.Context) {
+	q := strings.TrimSpace(c.Query("q"))
+	if len(q) < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "query too short"})
+		return
+	}
+	if len(q) > 64 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "query too long"})
+		return
+	}
+
+	results, err := s.Yahoo.SearchSymbols(c.Request.Context(), q, 12)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"error": "symbol search failed"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"results": results})
 }
 
 func (s *Server) GetWatchlist(c *gin.Context) {

@@ -43,6 +43,15 @@ export interface Alert {
   cooldown_sec: number;
 }
 
+export interface SymbolSearchResult {
+  symbol: string;
+  name: string;
+  exchange: string;
+  exchangeDisplay: string;
+  venue: string;
+  quoteType: string;
+}
+
 export interface AlertEvent {
   id: number;
   symbol: string;
@@ -55,6 +64,10 @@ export const api = {
   getSettings: () => request<Settings>('/settings'),
   patchSettings: (body: Partial<{ language: string; soundId: number; soundEnabled: boolean }>) =>
     request<Settings>('/settings', { method: 'PATCH', body: JSON.stringify(body) }),
+  searchSymbols: (q: string) =>
+    request<{ results: SymbolSearchResult[] }>(
+      `/symbols/search?q=${encodeURIComponent(q)}`,
+    ),
   getWatchlist: () => request<{ items: WatchlistRow[] }>('/watchlist'),
   addSymbol: (symbol: string) =>
     request<{ symbol: string }>('/watchlist', { method: 'POST', body: JSON.stringify({ symbol }) }),

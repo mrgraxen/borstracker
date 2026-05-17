@@ -19,20 +19,25 @@ const baseURL = "https://query1.finance.yahoo.com/v8/finance/chart/"
 type Client struct {
 	httpClient *http.Client
 	baseURL    string
+	searchURL  string
 }
 
 func NewClient() *Client {
 	return &Client{
 		httpClient: &http.Client{Timeout: 15 * time.Second},
 		baseURL:    baseURL,
+		searchURL:  defaultSearchURL,
 	}
 }
 
-func NewClientWithHTTP(c *http.Client, base string) *Client {
-	if base == "" {
-		base = baseURL
+func NewClientWithHTTP(c *http.Client, chartBase, searchBase string) *Client {
+	if chartBase == "" {
+		chartBase = baseURL
 	}
-	return &Client{httpClient: c, baseURL: base}
+	if searchBase == "" {
+		searchBase = defaultSearchURL
+	}
+	return &Client{httpClient: c, baseURL: chartBase, searchURL: searchBase}
 }
 
 type chartResponse struct {

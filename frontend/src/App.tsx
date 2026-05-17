@@ -1,8 +1,9 @@
-import { FormEvent, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, Alert, AlertEvent, Settings, WatchlistRow } from './api/client';
 import { playAlertSound } from './audio/sounds';
 import { StockChart } from './components/StockChart';
+import { SymbolSearch } from './components/SymbolSearch';
 import { useWebSocket, PriceUpdate, AlertUpdate } from './ws/useWebSocket';
 
 type ChartRange = '1d' | '1w' | '1m' | '3m' | '1y';
@@ -13,7 +14,6 @@ export default function App() {
   const [watchlist, setWatchlist] = useState<WatchlistRow[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [history, setHistory] = useState<AlertEvent[]>([]);
-  const [symbolInput, setSymbolInput] = useState('');
   const [selected, setSelected] = useState<string | null>(null);
   const [chartRange, setChartRange] = useState<ChartRange>('1d');
   const [chartPoints, setChartPoints] = useState<{ time: string; price: number }[]>([]);
@@ -86,14 +86,6 @@ export default function App() {
 
   useWebSocket(onPrice, onAlert);
 
-  const addSymbol = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!symbolInput.trim()) return;
-    await api.addSymbol(symbolInput.trim());
-    setSymbolInput('');
-    await refresh();
-  };
-
   const changeLanguage = async (lang: string) => {
     i18n.changeLanguage(lang);
     const updated = await api.patchSettings({ language: lang });
@@ -163,14 +155,7 @@ export default function App() {
 
       <main className="layout">
         <aside className="sidebar">
-          <form onSubmit={(e) => void addSymbol(e)} className="add-form">
-            <input
-              value={symbolInput}
-              onChange={(e) => setSymbolInput(e.target.value.toUpperCase())}
-              placeholder={t('symbolPlaceholder')}
-            />
-            <button type="submit">{t('add')}</button>
-          </form>
+          <SymbolSearch onAdded={() => void refresh()} />
 
           {watchlist.length === 0 ? (
             <p className="muted">{t('noWatchlist')}</p>
