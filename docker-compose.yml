@@ -70,11 +70,10 @@ services:
       context: .
       dockerfile: deploy/caddy/Dockerfile
     ports:
-      - "80:80"
-      - "443:443"
+      - "${HTTP_PORT:-8989}:80"
     env_file: .env
     environment:
-      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:8989}
     depends_on:
       - api
     volumes:

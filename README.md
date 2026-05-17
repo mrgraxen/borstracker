@@ -9,7 +9,7 @@ cp .env.example .env
 docker compose up -d
 ```
 
-Open [http://localhost](http://localhost) in your browser.
+Open [http://localhost:8989](http://localhost:8989) in your browser (HTTP only, no TLS).
 
 ## Architecture
 
@@ -38,7 +38,7 @@ flowchart TB
 
 | Service | Port (internal) | Role |
 |---------|-----------------|------|
-| `caddy` | 80/443 | TLS, static frontend, reverse proxy to API |
+| `caddy` | 8989 (host) → 80 (container) | Static frontend + reverse proxy to API (HTTP only by default) |
 | `api` | 8080 | REST API, WebSocket, session cookies |
 | `price-fetcher` | 8081 | Polls Yahoo Finance every 5s, evaluates alerts |
 | `postgres` | 5432 | Sessions, watchlists, alerts, price time series |
@@ -52,14 +52,14 @@ Copy `.env.example` to `.env`. Key variables:
 |----------|---------|-------------|
 | `DATABASE_URL` | (compose) | PostgreSQL connection string |
 | `REDIS_URL` | `redis://redis:6379/0` | Redis URL |
-| `FRONTEND_ORIGIN` | `http://localhost` | CORS allowed origin |
+| `HTTP_PORT` | `8989` | Host port for the web UI (maps to Caddy :80) |
+| `FRONTEND_ORIGIN` | `http://localhost:8989` | CORS allowed origin (must match browser URL) |
 | `COOKIE_SECURE` | `false` | Set `true` in production behind HTTPS |
 | `SESSION_MAX_AGE_DAYS` | `30` | Rolling session cookie lifetime |
 | `POLL_INTERVAL_SEC` | `5` | Yahoo poll interval per symbol set |
 | `YAHOO_MAX_CONCURRENCY` | `10` | Max parallel Yahoo requests |
 | `API_RATE_LIMIT_PER_MIN` | `60` | Per-session REST rate limit |
-| `CADDY_DOMAIN` | `localhost` | Domain for TLS (production) |
-| `ACME_EMAIL` | | Let's Encrypt email (production) |
+| `COOKIE_SECURE` | `false` | Set `true` only when using HTTPS |
 
 ## Adding new data sources
 
