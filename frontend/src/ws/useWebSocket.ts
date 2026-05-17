@@ -39,7 +39,14 @@ export function useWebSocket(
     let timer: ReturnType<typeof setTimeout>;
 
     const connect = () => {
-      ws = new WebSocket(wsURL());
+      const url = wsURL();
+      ws = new WebSocket(url);
+      ws.onopen = () => {
+        console.info('[ws] connected', url);
+      };
+      ws.onerror = () => {
+        console.warn('[ws] connection error', url);
+      };
       ws.onmessage = (ev) => {
         try {
           const msg = JSON.parse(ev.data as string) as WSMessage;

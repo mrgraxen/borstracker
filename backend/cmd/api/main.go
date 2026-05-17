@@ -19,6 +19,7 @@ import (
 	"github.com/graxe/borstracker/internal/db"
 	"github.com/graxe/borstracker/internal/httpx"
 	"github.com/graxe/borstracker/internal/metrics"
+	"github.com/graxe/borstracker/internal/origin"
 	"github.com/graxe/borstracker/internal/pubsub"
 	"github.com/graxe/borstracker/internal/ratelimit"
 	"github.com/graxe/borstracker/internal/session"
@@ -58,6 +59,8 @@ func main() {
 	alerts := db.NewAlertRepo(pool)
 	prices := db.NewPriceRepo(pool)
 
+	originChecker := origin.NewChecker(cfg.AllowedOrigins, cfg.TrustProxy)
+
 	srv := &httpx.Server{
 		Sessions:  sessions,
 		Watchlist: watchlist,
@@ -67,10 +70,7 @@ func main() {
 		Hub:       hub,
 		Yahoo:     yahoo.NewClient(),
 		Upgrader: websocket.Upgrader{
-			CheckOrigin: func(r *http.Request) bool {
-				origin := r.Header.Get("Origin")
-				return origin == "" || origin == cfg.FrontendOrigin
-			},
+			CheckOrigin: originChecker.AllowRequest,
 		},
 	}
 
@@ -83,7 +83,7 @@ func main() {
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{cfg.FrontendOrigin},
+		AllowOriginFunc: originChecker.AllowOrigin,
 		AllowMethods:     []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Content-Type"},
 		AllowCredentials: true,

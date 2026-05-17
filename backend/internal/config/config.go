@@ -3,8 +3,30 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
+
+func parseAllowedOrigins(primary, extra string) []string {
+	var out []string
+	seen := make(map[string]struct{})
+	add := func(s string) {
+		s = strings.TrimSpace(s)
+		if s == "" {
+			return
+		}
+		if _, ok := seen[s]; ok {
+			return
+		}
+		seen[s] = struct{}{}
+		out = append(out, s)
+	}
+	add(primary)
+	for _, part := range strings.Split(extra, ",") {
+		add(part)
+	}
+	return out
+}
 
 type Config struct {
 	Env                string
@@ -12,6 +34,8 @@ type Config struct {
 	DatabaseURL        string
 	RedisURL           string
 	FrontendOrigin     string
+	AllowedOrigins     []string
+	TrustProxy         bool
 	CookieSecure       bool
 	SessionMaxAge      time.Duration
 	SessionCookieName  string
@@ -26,12 +50,16 @@ type Config struct {
 }
 
 func Load() Config {
+	env := getEnv("ENV", "development")
+	frontendOrigin := getEnv("FRONTEND_ORIGIN", "http://localhost:8989")
 	return Config{
-		Env:                getEnv("ENV", "development"),
+		Env:                env,
 		LogLevel:           getEnv("LOG_LEVEL", "info"),
 		DatabaseURL:        getEnv("DATABASE_URL", "postgres://borstracker:borstracker@localhost:5432/borstracker?sslmode=disable"),
 		RedisURL:           getEnv("REDIS_URL", "redis://localhost:6379/0"),
-		FrontendOrigin:     getEnv("FRONTEND_ORIGIN", "http://localhost"),
+		FrontendOrigin:     frontendOrigin,
+		AllowedOrigins:     parseAllowedOrigins(frontendOrigin, os.Getenv("ALLOWED_ORIGINS")),
+		TrustProxy:         getEnvBool("TRUST_PROXY", env == "production"),
 		CookieSecure:       getEnvBool("COOKIE_SECURE", false),
 		SessionMaxAge:      time.Duration(getEnvInt("SESSION_MAX_AGE_DAYS", 30)) * 24 * time.Hour,
 		SessionCookieName:  getEnv("SESSION_COOKIE_NAME", "session_id"),

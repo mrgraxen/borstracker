@@ -3,13 +3,21 @@
 }
 
 :80 {
-	encode gzip
+	# WebSocket — no compression (breaks upgrade on some proxies)
+	handle /api/v1/ws {
+		reverse_proxy api:8080 {
+			transport http {
+				read_timeout 0
+			}
+		}
+	}
 
 	handle /api/* {
 		reverse_proxy api:8080
 	}
 
 	handle {
+		encode gzip
 		root * /srv
 		try_files {path} /index.html
 		file_server

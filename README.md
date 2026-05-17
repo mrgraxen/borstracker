@@ -55,11 +55,55 @@ Copy `.env.example` to `.env`. Key variables:
 | `HTTP_PORT` | `8989` | Host port for the web UI (maps to Caddy :80) |
 | `FRONTEND_ORIGIN` | `http://localhost:8989` | CORS allowed origin (must match browser URL) |
 | `COOKIE_SECURE` | `false` | Set `true` in production behind HTTPS |
+| `TRUST_PROXY` | `false` | `true` behind reverse proxy (WebSocket Origin via `X-Forwarded-*`) |
+| `ALLOWED_ORIGINS` | | Comma-separated extra CORS origins |
 | `SESSION_MAX_AGE_DAYS` | `30` | Rolling session cookie lifetime |
 | `POLL_INTERVAL_SEC` | `5` | Yahoo poll interval per symbol set |
 | `YAHOO_MAX_CONCURRENCY` | `10` | Max parallel Yahoo requests |
-| `API_RATE_LIMIT_PER_MIN` | `60` | Per-session REST rate limit |
-| `COOKIE_SECURE` | `false` | Set `true` only when using HTTPS |
+
+## Reverse proxy and WebSocket
+
+The browser opens **`wss://your-domain/api/v1/ws`** (same host as the page). Traffic path:
+
+```text
+Browser → [your TLS proxy] → Docker Caddy :8989 → Go api :8080
+```
+
+### Checklist
+
+1. **`.env` on the server** (must match the URL in the browser exactly):
+
+   ```bash
+   ENV=production
+   FRONTEND_ORIGIN=https://bors.chickendinner.vip
+   TRUST_PROXY=true
+   COOKIE_SECURE=true
+   ```
+
+2. **External reverse proxy** must forward WebSocket upgrade headers to port `8989`:
+
+   - `Upgrade: websocket`
+   - `Connection: upgrade`
+   - `X-Forwarded-Proto: https`
+   - `X-Forwarded-Host: bors.chickendinner.vip`
+
+   See [deploy/nginx-reverse-proxy.example.conf](deploy/nginx-reverse-proxy.example.conf) for Nginx.
+
+3. **Cloudflare**: enable WebSockets for the hostname; orange-cloud proxy can block or timeout WS if misconfigured.
+
+4. **Test** (from your machine):
+
+   ```bash
+   curl -i -N \
+     -H "Connection: Upgrade" \
+     -H "Upgrade: websocket" \
+     -H "Sec-WebSocket-Version: 13" \
+     -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" \
+     -H "Origin: https://bors.chickendinner.vip" \
+     https://bors.chickendinner.vip/api/v1/ws
+   ```
+
+   Expect `101 Switching Protocols`. `403` → wrong `FRONTEND_ORIGIN` / Origin check. `502` → proxy not forwarding WS.
 
 ## Adding new data sources
 
