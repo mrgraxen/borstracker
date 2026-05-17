@@ -28,18 +28,24 @@ export default function App() {
   });
 
   const refresh = useCallback(async () => {
-    const [s, w, a, h] = await Promise.all([
-      api.getSettings(),
-      api.getWatchlist(),
-      api.getAlerts(),
-      api.getHistory(),
-    ]);
-    setSettings(s);
-    i18n.changeLanguage(s.language);
-    setWatchlist(w.items);
-    setAlerts(a.alerts);
-    setHistory(h.events);
-    setSelected((prev) => prev ?? w.items[0]?.symbol ?? null);
+    try {
+      const [s, w, a, h] = await Promise.all([
+        api.getSettings(),
+        api.getWatchlist(),
+        api.getAlerts(),
+        api.getHistory(),
+      ]);
+      setSettings(s);
+      i18n.changeLanguage(s.language);
+      setWatchlist(w.items ?? []);
+      setAlerts(a.alerts ?? []);
+      setHistory(h.events ?? []);
+      setSelected((prev) => prev ?? w.items?.[0]?.symbol ?? null);
+    } catch {
+      setWatchlist((prev) => prev ?? []);
+      setAlerts((prev) => prev ?? []);
+      setHistory((prev) => prev ?? []);
+    }
   }, [i18n]);
 
   useEffect(() => {
@@ -90,7 +96,7 @@ export default function App() {
     setSettings(updated);
   };
 
-  const symbolAlerts = alerts.filter((a) => a.symbol === selected);
+  const symbolAlerts = (alerts ?? []).filter((a) => a.symbol === selected);
   const alertTypes = ['absolute_below', 'absolute_above', 'pct_below_open', 'pct_above_open'];
 
   return (
@@ -159,7 +165,7 @@ export default function App() {
             <p className="muted">{t('noWatchlist')}</p>
           ) : (
             <ul className="watchlist">
-              {watchlist.map((row) => (
+              {(watchlist ?? []).map((row) => (
                 <li key={row.symbol} className={selected === row.symbol ? 'active' : ''}>
                   <button type="button" onClick={() => setSelected(row.symbol)}>
                     <span className="sym">{row.symbol}</span>
@@ -183,7 +189,7 @@ export default function App() {
           <section className="history">
             <h3>{t('history')}</h3>
             <ul>
-              {history.map((ev) => (
+              {(history ?? []).map((ev) => (
                 <li key={ev.id}>
                   <small>{new Date(ev.triggered_at).toLocaleString()}</small>
                   <div>{ev.message}</div>

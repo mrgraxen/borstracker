@@ -67,7 +67,7 @@ func (s *Server) SearchSymbols(c *gin.Context) {
 		c.JSON(http.StatusBadGateway, gin.H{"error": "symbol search failed"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"results": results})
+	c.JSON(http.StatusOK, gin.H{"results": jsonSlice(results)})
 }
 
 func (s *Server) GetWatchlist(c *gin.Context) {
@@ -142,7 +142,7 @@ func (s *Server) ListAlerts(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"alerts": alerts})
+	c.JSON(http.StatusOK, gin.H{"alerts": jsonSlice(alerts)})
 }
 
 func (s *Server) CreateAlert(c *gin.Context) {
@@ -220,7 +220,7 @@ func (s *Server) AlertHistory(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"events": events})
+	c.JSON(http.StatusOK, gin.H{"events": jsonSlice(events)})
 }
 
 func (s *Server) PatchSettings(c *gin.Context) {
@@ -294,7 +294,7 @@ func (s *Server) GetChart(c *gin.Context) {
 			points = chartPoints
 		}
 	}
-	c.JSON(http.StatusOK, gin.H{"symbol": symbol, "range": rng, "points": points})
+	c.JSON(http.StatusOK, gin.H{"symbol": symbol, "range": rng, "points": jsonSlice(points)})
 }
 
 func chartSince(rng string) time.Time {

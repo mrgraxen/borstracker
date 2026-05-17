@@ -55,7 +55,7 @@ export function StockChart({ symbol, points, alerts, livePrice }: Props) {
 
   useEffect(() => {
     if (!seriesRef.current) return;
-    const markers = alerts
+    const markers = (alerts ?? [])
       .filter((a) => a.enabled)
       .map((a) => {
         const v = parseFloat(a.threshold);

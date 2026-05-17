@@ -56,8 +56,9 @@ export function SymbolSearch({ onAdded }: Props) {
       void api
         .searchSymbols(q)
         .then((res) => {
-          setResults(res.results);
-          setOpen(res.results.length > 0);
+          const list = res.results ?? [];
+          setResults(list);
+          setOpen(list.length > 0);
           setHighlight(0);
         })
         .catch(() => {
