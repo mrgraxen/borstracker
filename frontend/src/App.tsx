@@ -229,6 +229,7 @@ export default function App() {
               </div>
               <StockChart
                 symbol={selected}
+                range={chartRange}
                 points={chartPoints}
                 alerts={symbolAlerts}
                 livePrice={livePrices[selected]}
